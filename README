@@ -1,0 +1,11 @@
+Came up with an idea to create a database of all TVs and the parts that they
+use for the purpose of organizing a tv repair business.
+
+
+There are some special cases when dealing with Encompass search results. For
+example, if searching for a supposedly correct part number, such as the number
+seen on a Panasonic main board, Encompass will return the correct parts but
+the title will not hint or mention the part number being searched. That is because
+Panasonic parts have a special code that needs to be resolved before looking
+up the specific part; but Encompass knows this and yields desired results.
+

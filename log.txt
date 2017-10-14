@@ -1,0 +1,36 @@
+LOG: TV Parts and More
+
+10/04/2017
+==========
+- Beginning by parsing a product search html file from ShopJimmy. Every
+product can be identified by the class value "product-name" of a header(h4)
+element. Within the header element there is an anchor tag containing the
+name of the product as the value of it's title attribute.
+
+
+10/10/2017
+==========
+I'm thinking about implementing interprocess communication between the driver
+program and the program to download and parse the webpages for potential
+security reasons such as separating a malicious download from the main thread.
+A more apparent reason for using IPC is to avoid termination of the main
+process if there is an error with a step of the program.
+
+
+10/11/2017
+==========
+I may eventually call this program I'm making: "The TV Parts Query Master."
+Something like that. Today is "program away" day. Screw good practices (that
+don't immediately come to mind) and get things working!
+
+10/12/2017
+==========
+Using get_product_names.c to get the products resulting from a search from
+ShopJimmy. 
+
+10/13/2017
+==========
+I'd like to eventually match up the search time with products searched for.
+This can be organized by observing the time at which a page was loaded and what
+was being searched for. I hope to make a database table of all the products
+searched and the different times each product was searched for.
