@@ -57,7 +57,8 @@ struct res_html load_html_file(const char* filename)
     }
     
     if(size <= 0) {
-        fprintf(stderr, "Can't get file size or file is empty: %s\n", filename);
+        fprintf(stderr,
+		"Can't get file size or file is empty: %s\n", filename);
         exit(EXIT_FAILURE);
     }
     
@@ -69,7 +70,9 @@ struct res_html load_html_file(const char* filename)
     
     size_t nread = fread(html, 1, size, fh);
     if (nread != size) {
-        fprintf(stderr, "could not read %ld bytes (" MyCORE_FMT_Z " bytes done)\n", size, nread);
+        fprintf(stderr,
+		"could not read %ld bytes (" MyCORE_FMT_Z " bytes done)\n",
+		size, nread);
         exit(EXIT_FAILURE);
     }
 
@@ -80,12 +83,28 @@ struct res_html load_html_file(const char* filename)
 }
 
 struct product {
-  double price;
+  const char* price;
   const char* title;
 } typedef product;
 
-product get_product(myhtml_tree_t* tree){
-  
+const char* product_price(myhtml_tree_t *tree, myhtml_tree_node_t *node, int i)
+{
+  const char* price;
+  myhtml_collection_t *productPrice =
+    myhtml_get_nodes_by_attribute_value(tree, NULL,NULL,false, NULL,0,
+				    "price", 5, NULL);
+  if(productPrice){
+    myhtml_tree_node_t *priceNode =
+      myhtml_node_child(productPrice->list[i]);
+    price = myhtml_node_text(priceNode, NULL);
+  }
+
+  return price;
+}
+
+product* get_products(myhtml_tree_t* tree, FILE** outfile)
+{
+  product* _products;
   // get nodes by an attribute value "product-name"
   myhtml_collection_t *products =
     myhtml_get_nodes_by_attribute_value(tree,
@@ -97,46 +116,65 @@ product get_product(myhtml_tree_t* tree){
 					"product-name",
 					12,
 					NULL);
+
   if(!products && !products->list && !products->length)
-    return;
+    return NULL;
  
   if(products){
-    printf("Products(total: %d): \n", products->length);
+    _products = malloc(sizeof(product) * products->length);
+    fprintf(*outfile, "\t(total: %d): \n", products->length);
     
     for(int i = 0; i < products->length; ++i){
-      myhtml_tree_node_t *p1 = myhtml_node_child(products->list[i]);
+      myhtml_tree_node_t *p1 =
+	myhtml_node_child(products->list[i]);
       const char* p1text = myhtml_node_text(p1, NULL);
-      if (p1text) printf("%s\n", p1text);
+      if (p1text) {
+	fwrite(p1text, 1, strlen(p1text), *outfile);	// NULL
+      }
       else{
-	myhtml_collection_t *productTitle =
-	  myhtml_get_nodes_by_attribute_key(tree, NULL, p1,
+	  myhtml_collection_t * productTitle =
+	    myhtml_get_nodes_by_attribute_key(tree, NULL, p1,
 					    "title", 5, NULL);
 	if(productTitle){
-	  printf("Product(%d): ", i);
+	  fprintf(*outfile, "%d): ", i);
 	  myhtml_tree_node_t *titleNode =
 	    myhtml_node_child(productTitle->list[0]);
-	  const char* _title = myhtml_node_text(titleNode, NULL);
-	  printf("%s\n", _title);
+	  _products[i].title = myhtml_node_text(titleNode, NULL);
+	  _products[i].price = product_price(tree, p1, i);
+	  
+	  fprintf(*outfile, "%s", _products[i].title);
+	  fprintf(*outfile, " %s", _products[i].price);
+	  fprintf(*outfile, "\n\n");
 	}
       }
     }
+    
+    myhtml_collection_destroy(products);
+    return _products;
   }
 
-  myhtml_collection_destroy(products);
-
-  
+  return NULL;
 }
 
 int main(int argc, const char * argv[])
 {
     const char* path;
-
+    const char* outfile_name; 
+    FILE* outptr;
+    
     if (argc == 2) {
         path = argv[1];
+	outptr = stdout;
+    }
+    else if(argc == 3){
+      path = argv[1];
+      outfile_name = argv[2];
+      outptr = fopen(outfile_name, "w");
     }
     else {
-        printf("Bad ARGV!\nUse: get_title_high_level <path_to_html_file>\n");
-        exit(EXIT_FAILURE);
+      printf("Void execution!\n");
+      printf("Use: get_product_names <path_to_html_file> <output file>\n");
+      exit(EXIT_FAILURE);
     }
     
     struct res_html res = load_html_file(path);
@@ -162,13 +200,13 @@ int main(int argc, const char * argv[])
         
         if(text_node) {
             const char* text = myhtml_node_text(text_node, NULL);
-            
+
             if(text)
-                printf("Title(results for): \"%s\"\n", text);
+	      fwrite(text, 1, strlen(text), outptr);
         }
     }
-
-    get_product(tree);
+    
+    product* products = get_products(tree, &outptr);
     
     // release resources
     myhtml_collection_destroy(titleCollection);
@@ -176,6 +214,8 @@ int main(int argc, const char * argv[])
     myhtml_destroy(myhtml);
     
     free(res.html);
+    fclose(outptr);
+    free(products);
     
     return 0;
 }
