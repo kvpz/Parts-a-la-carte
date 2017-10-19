@@ -34,3 +34,11 @@ I'd like to eventually match up the search time with products searched for.
 This can be organized by observing the time at which a page was loaded and what
 was being searched for. I hope to make a database table of all the products
 searched and the different times each product was searched for.
+
+10/16/2017
+==========
+- Creating an cgi folder with programs dedicated for executing cgi responses.
+- I've gpt to start making programs/ functions for making http(s) requests. Is
+a log a diary?
+
+

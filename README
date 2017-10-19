@@ -9,3 +9,6 @@ the title will not hint or mention the part number being searched. That is becau
 Panasonic parts have a special code that needs to be resolved before looking
 up the specific part; but Encompass knows this and yields desired results.
 
+### CGI
+The basic search program will execute child processes for web requests and
+post processing of the web responses.

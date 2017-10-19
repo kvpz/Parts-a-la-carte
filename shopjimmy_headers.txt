@@ -1,0 +1,88 @@
+Details about ShopJimmy's http headers
+
+# Main Page
+
+## Request headers
+Host: duckduckgo.com
+User-Agent: Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+DNT: 1
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+
+## Response headers
+server: nginx
+date: Thu, 19 Oct 2017 00:11:57 GMT
+content-type: text/html; charset=UTF-8
+expires: Thu, 19 Oct 2017 00:11:58 GMT
+cache-control: max-age=1
+strict-transport-security: max-age=31536000
+x-duckduckgo-locale: en_US
+content-encoding: gzip
+X-Firefox-Spdy: h2
+
+
+# Main Page (second request immediately after first)
+
+## Request headers
+Host: www.shopjimmy.com
+User-Agent: Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Referer: https://duckduckgo.com/
+DNT: 1
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Cache-Control: max-age=0
+
+## Response headers
+Server: Apache
+X-Frame-Options: SAMEORIGIN
+P3p: CP="CAO PSA OUR"
+X-Hostname: mce111-node02.nexcess.net
+Content-Type: text/html; charset=UTF-8
+X-Akamai-Transformed: c - 0 -
+Content-Encoding: gzip
+Expires: Thu, 19 Oct 2017 00:15:03 GMT
+Cache-Control: max-age=0, no-cache, no-store
+Pragma: no-cache
+Date: Thu, 19 Oct 2017 00:15:03 GMT
+Content-Length: 16780
+Connection: keep-alive
+Set-Cookie: frontend=4e9mhgrrqq9hrnbff7ji6ecl83; expires=Thu, 19-Oct-2017 10:15:02 GMT; path=/; domain=www.shopjimmy.com; HttpOnly
+Link: <http://2.shard.shopjimmy.com.edgesuite.net>;rel=preconnect, <https://vars.hotjar.com>;rel=preconnect, <https://www.googlecommerce.com>;rel=preconnect, <http://1.shard.shopjimmy.com.edgesuite.net>;rel=preconnect, <https://script.hotjar.com>;rel=preconnect, <http://www.google-analytics.com>;rel=preconnect, <http://img.youtube.com>;rel=preconnect, <http://static.hotjar.com>;rel=preconnect, <http://v2.zopim.com>;rel=preconnect, <http://assets.shopjimmy.com>;rel=preconnect;crossorigin
+Vary: User-Agent
+
+
+# Search page (valid page)
+
+## Request headers
+Host: www.shopjimmy.com
+User-Agent: Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Referer: http://www.shopjimmy.com/catalogsearch/result/?q=55lg
+Cookie: frontend=4e9mhgrrqq9hrnbff7ji6ecl83
+DNT: 1
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+
+## Response headers
+Server: Apache
+X-Frame-Options: SAMEORIGIN
+P3p: CP="CAO PSA OUR"
+X-Hostname: mce111-node02.nexcess.net
+Content-Type: text/html; charset=UTF-8
+Vary: Accept-Encoding
+Content-Encoding: gzip
+Expires: Thu, 19 Oct 2017 02:46:47 GMT
+Cache-Control: max-age=0, no-cache, no-store
+Pragma: no-cache
+Date: Thu, 19 Oct 2017 02:46:47 GMT
+Content-Length: 17027
+Connection: keep-alive
+Set-Cookie: frontend=4e9mhgrrqq9hrnbff7ji6ecl83; expires=Thu, 19-Oct-2017 12:46:42 GMT; path=/; domain=www.shopjimmy.com; httponly
