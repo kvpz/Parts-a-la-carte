@@ -42,3 +42,12 @@ searched and the different times each product was searched for.
 a log a diary?
 
 
+10/19/2017
+==========
+Implemented request_shopjimmy.c for the sole purpose of making requests to
+ShopJimmy. 
+
+10/29/2017
+==========
+Requests can be made to ShopJimmy via cgi. Currently testing locally.
+

@@ -105,7 +105,7 @@ const char* product_price(myhtml_tree_t *tree, myhtml_tree_node_t *node, int i)
 product* get_products(myhtml_tree_t* tree, FILE** outfile)
 {
   product* _products;
-  // get nodes by an attribute value "product-name"
+  // get nodes by the attribute value "product-name"
   myhtml_collection_t *products =
     myhtml_get_nodes_by_attribute_value(tree,
 					NULL,
@@ -127,25 +127,20 @@ product* get_products(myhtml_tree_t* tree, FILE** outfile)
     for(int i = 0; i < products->length; ++i){
       myhtml_tree_node_t *p1 =
 	myhtml_node_child(products->list[i]);
-      const char* p1text = myhtml_node_text(p1, NULL);
-      if (p1text) {
-	fwrite(p1text, 1, strlen(p1text), *outfile);	// NULL
-      }
-      else{
-	  myhtml_collection_t * productTitle =
-	    myhtml_get_nodes_by_attribute_key(tree, NULL, p1,
-					    "title", 5, NULL);
-	if(productTitle){
-	  fprintf(*outfile, "%d): ", i);
-	  myhtml_tree_node_t *titleNode =
-	    myhtml_node_child(productTitle->list[0]);
-	  _products[i].title = myhtml_node_text(titleNode, NULL);
-	  _products[i].price = product_price(tree, p1, i);
+
+      myhtml_collection_t * productTitle =
+	myhtml_get_nodes_by_attribute_key(tree, NULL, p1,
+					  "title", 5, NULL);
+      if(productTitle){
+	fprintf(*outfile, "<br/>%d) ", i);
+	myhtml_tree_node_t *titleNode =
+	  myhtml_node_child(productTitle->list[0]);
+	_products[i].title = myhtml_node_text(titleNode, NULL);
+	_products[i].price = product_price(tree, p1, i);
 	  
-	  fprintf(*outfile, "%s", _products[i].title);
-	  fprintf(*outfile, " %s", _products[i].price);
-	  fprintf(*outfile, "\n\n");
-	}
+	fprintf(*outfile, "%s", _products[i].title);
+	fprintf(*outfile, " %s", _products[i].price);
+	fprintf(*outfile, "\n\n");
       }
     }
     
