@@ -1,9 +1,9 @@
 /*
-  Requests for Shop Jimmy
+  Requests for Encompass
   
   This program is designed to make requests to Shop Jimmy using
   libcurl. The request is logged and the response is printed to a
-  file identified as <time>_sj.
+  file identified as <time>_enc.
 
   The program is not always be trusted when it mentions that a file
   is cached because it relies on the log file and not necessarily if 
@@ -33,7 +33,7 @@
 /*
   A single log's format: 
   <time> <query> <provider> <response file> \n
-  1234567890 55lnx10 SJ
+  1234567890 55lnx10 ENC
   Rules for logging requests. 
   If a unique request, one that hasn't been made in the past 12 hours, is to
   be made, it should be appended to the end of the log file.
@@ -66,8 +66,8 @@ int log_request(const char* query_string, const char* time,
       if(strcmp(log_query, query_string) == 0){
 	// the request has been made and shouldn't be repeated.
 	fclose(log);
-	//printf("Request (cached) saved to: %s_js\n", time_str);
-	sprintf(response_file, "%s_sj", time_str);
+	//printf("Request (cached) saved to: %s_enc\n", time_str);
+	sprintf(response_file, "%s_enc", time_str);
 	free(time_str);
 	return REQUEST_CACHED;
       }
@@ -110,18 +110,18 @@ int main(int argc, char* argv[])
   sprintf(time_str, "%d", timer);
   char* response_file = malloc(30);
 
-  int status = log_request(argv[1], time_str, "SJ", response_file);
+  int status = log_request(argv[1], time_str, "ENC", response_file);
   if(status == REQUEST_CACHED){
     //printf("The request has already been made within the last 12 hours.\n");
     printf("%s%s", FILE_LOCATION, response_file);
     return 0;
   }
 
-  sprintf(response_file, "%s_sj", time_str);
+  sprintf(response_file, "%s_enc", time_str);
   FILE* outfile;
 
   char* request_uri = malloc(strlen(shopjimmy_uri) + strlen(argv[1]));
-  sprintf(request_uri, "http://www.shopjimmy.com/catalogsearch/result/?q=%s",
+  sprintf(request_uri, "https://encompass.com/search?searchTerm=%s",
 	  argv[1]);
   
   //printf("The requested uri is: %s\n", request_uri);
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
   
   char* response_file_location =
-    malloc(strlen(FILE_LOCATION) + strlen(response_file)+1);
+    malloc(strlen(FILE_LOCATION) + strlen(response_file) + 1);
   sprintf(response_file_location, "%s%s", FILE_LOCATION, response_file);
   
   // Open file to write response body
