@@ -1,25 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
- 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
- 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
- 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
- 
- Author: lex.borisov@gmail.com (Alexander Borisov)
-
- Modifications by Kevin Perez:
-
- This code will be used to extract products from a ShopJimmy webpage containing
+ This code will be used to extract products from a Encompass webpage containing
  search results. The products will be output to stdout or some other file
  descriptor.
 */
@@ -36,32 +16,83 @@ struct res_html {
     size_t size;
 };
 
+struct Product {
+  const char* price;
+  char* title;
+  char* availability;
+} typedef Product;
+
+char* get_product_availability(myhtml_tree_t* tree,
+			       myhtml_tree_node_t* product)
+{
+  const char* text = myhtml_node_text(product, NULL);
+  if(text){
+    printf("text: %s\n", text);
+  }
+}
+
+/*
+  Extract product name and its details from the html element.
+ */
+Product get_table_row_data(myhtml_tree_t* tree, myhtml_tree_node_t* tr)
+{
+  Product product;
+  // This should have a length of 3 (3 <tr> elements);
+  myhtml_collection_t* row_data =
+    myhtml_get_nodes_by_name_in_scope(tree,
+				      NULL,
+				      tr,
+				      "td",
+				      2,
+				      NULL);
+
+  // print the product name and its price
+  for(int d = 0; d < row_data->length; ++d){
+    myhtml_tree_node_t* text_node =
+      myhtml_node_child(row_data->list[d]);
+    const char* text = myhtml_node_text(text_node, NULL);
+    if(text && d == 1){
+      product.title = malloc(strlen(text)+1);
+      memmove(product.title, text, strlen(text));
+      //strncpy(product.title, text, strlen(text)+1);
+      product.title[strlen(text)] = '\0';
+    }
+    else if(text && d == 2){
+      product.availability = malloc(strlen(text)+1);
+      memmove(product.availability, text, strlen(text));
+      //strncpy(product.availability, text, strlen(text)+1);
+      product.availability[strlen(text)] = '\0';
+    }
+    
+    //free(text);
+  }
+
+  return product;
+}
+
 char* get_title(myhtml_tree_t* tree)
 {
-    myhtml_collection_t *titleCollection =
-      myhtml_get_nodes_by_tag_id(tree, NULL, MyHTML_TAG_TITLE, NULL);
+  char* title;
+  myhtml_collection_t *titleCollection =
+    myhtml_get_nodes_by_tag_id(tree, NULL, MyHTML_TAG_TITLE, NULL);
     
-    if(titleCollection && titleCollection->list && titleCollection->length) {
-      printf("titleCollection:\n");
-      printf("length: %d\n", titleCollection->length);
+  if(titleCollection && titleCollection->list && titleCollection->length) {    
+    myhtml_tree_node_t *text_node =
+      myhtml_node_child(titleCollection->list[0]);
       
-      myhtml_tree_node_t *text_node =
-	  myhtml_node_child(titleCollection->list[0]);
-      
-        if(text_node) {
-	  //printf("text_node is valid\n");
-            const char* text = myhtml_node_text(text_node, NULL);
+    if(text_node) {
+      title = myhtml_node_text(text_node, NULL);
 
-            if(text){
-	      printf("text: %s", text);
-	      myhtml_collection_destroy(titleCollection);
-	      return text;
-	    }
-	      //fwrite(text, 1, strlen(text), outptr);
-	    
-        }
+      if(title){
+	myhtml_collection_destroy(titleCollection);
+	return title;
+      }
+      //fwrite(title, 1, strlen(title), outptr);	    
     }
-    myhtml_collection_destroy(titleCollection);
+  }
+  
+  myhtml_collection_destroy(titleCollection);
+  return NULL;
 }
 
 struct res_html load_html_file(const char* filename)
@@ -110,11 +141,6 @@ struct res_html load_html_file(const char* filename)
     return res;
 }
 
-struct product {
-  const char* price;
-  const char* title;
-} typedef product;
-
 const char* product_price(myhtml_tree_t *tree, myhtml_tree_node_t *node, int i)
 {
   const char* price;
@@ -130,10 +156,12 @@ const char* product_price(myhtml_tree_t *tree, myhtml_tree_node_t *node, int i)
   return price;
 }
 
-product* get_products(myhtml_tree_t* tree, FILE** outfile)
+Product* get_products(myhtml_tree_t* tree, FILE** outfile, int* total_products)
 {
-  product* _products;
-  // get nodes by the attribute value "product-name"
+  char parts_table_id[] = "datatable-part";
+  Product* _products;
+  
+  // Get table representing parts
   myhtml_collection_t *products =
     myhtml_get_nodes_by_attribute_value(tree,
 					NULL,
@@ -141,42 +169,36 @@ product* get_products(myhtml_tree_t* tree, FILE** outfile)
 					false,
 					NULL,
 					0,
-					"product-name",
-					12,
+					parts_table_id,
+					strlen(parts_table_id),
 					NULL);
-
   if(!products && !products->list && !products->length)
     return NULL;
- 
-  if(products){
-    _products = malloc(sizeof(product) * products->length);
-    fprintf(*outfile, "\t(total: %d): \n", products->length);
-    
-    for(int i = 0; i < products->length; ++i){
-      myhtml_tree_node_t *p1 =
-	myhtml_node_child(products->list[i]);
 
-      myhtml_collection_t * productTitle =
-	myhtml_get_nodes_by_attribute_key(tree, NULL, p1,
-					  "title", 5, NULL);
-      if(productTitle){
-	fprintf(*outfile, "<br/>%d) ", i);
-	myhtml_tree_node_t *titleNode =
-	  myhtml_node_child(productTitle->list[0]);
-	_products[i].title = myhtml_node_text(titleNode, NULL);
-	_products[i].price = product_price(tree, p1, i);
-	  
-	fprintf(*outfile, "%s", _products[i].title);
-	fprintf(*outfile, " %s", _products[i].price);
-	fprintf(*outfile, "\n\n");
-      }
-    }
-    
-    myhtml_collection_destroy(products);
-    return _products;
+  // Get table body (tbody child elements, tr) from parts table
+  myhtml_collection_t* products_tbody =
+    myhtml_get_nodes_by_name_in_scope(tree,
+				      NULL,
+				      products->list[0],
+				      "tr",
+				      2,
+				      NULL);
+
+  *total_products = products_tbody->length - 1;
+  _products = malloc(sizeof(Product)*(products_tbody->length - 1)); 
+  for(int r = 1; r < products_tbody->length; ++r){
+    Product _product = get_table_row_data(tree, products_tbody->list[r]);
+    _products[r-1] = _product;
   }
 
-  return NULL;
+  //free(parts_table_id);
+  return _products;
+  //return NULL;
+}
+
+void print_product_html(Product product)
+{
+  
 }
 
 int main(int argc, const char * argv[])
@@ -214,10 +236,18 @@ int main(int argc, const char * argv[])
     myhtml_parse(tree, MyENCODING_UTF_8, res.html, res.size);
     
     // parse html for title elements
-    char* title = get_title(tree);;
-    printf("The title returned is: %s\n", title);
+    char* title = get_title(tree);
+    //printf("The title of the page is: %s\n\n", title);
+    
     // Get the products
-    product* products = get_products(tree, &outptr);
+    int total_products;
+    Product* products = get_products(tree, &outptr, &total_products);
+    printf("Total products: %d<br/><br/>\n", total_products);
+    for(int i = 0; i < total_products; ++i){
+      printf("Product: %s<br/>\n",products[i].title);
+      printf("Availability: %s<br/>\n", products[i].availability);
+      printf("<br/>\n");
+    }
     
     // release resources
     myhtml_tree_destroy(tree);

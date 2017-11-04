@@ -19,6 +19,7 @@ gcc -g -I$MYHTML_HEADERS -L$LIB request_encompass.c -o request_encompass -lmyhtm
 
 echo "gcc -g -I$MYHTML_HEADERS -L$LIB get_product_names_enc.c -o get_product_names_enc -lmyhtml"
 gcc -g -I$MYHTML_HEADERS -L$LIB get_product_names_enc.c -o get_product_names_enc -lmyhtml
+
 # If executable emits an error related to shared libraries, make sure
 # the environment variable $LD_LIBRARY_PATH is set correctly.
 # The $LD_LIBRARY_PATH variable should be set to the location of the
